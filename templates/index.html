@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="form-group row">
+        <div class="col-xs-3" style="width:100%">
+            <table class="maintable">
+                <tbody>
+                    <tr>
+                        <td>
+                            <label>Interface Name: </label>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control"
+                                   id="interface" placeholder="Enter Interface Name">
+                        </td>
+                        <td><button type="button"  id="btn" class="btn-primary"> Get
+                Details</button></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><div id="inputErrorMsg"></div></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+
+
+        </div>
+        <div class="col-xs-3">
+            <button type="button"  id="btn1" class="btn-primary"> Show All
+                Interface Details
+            </button>
+        </div>
+    </div>
+
+<div id="auditDialog">
+
+
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+$(function() {
+          $('#btn1').on('click', function(e) {
+            e.preventDefault()
+            $("#inputErrorMsg").html('');
+            $.getJSON('NTTGN/Interfaces',
+                function(data) {
+              document.getElementById("interface").value = "";
+              show_details(data);
+              //alert(data);
+            });
+            return false;
+          });
+        });
+$(function() {
+          $('#btn').on('click', function(e) {
+            e.preventDefault()
+            interface = document.getElementById("interface");
+            if (interface == null || interface.value  == ''){
+                $("#inputErrorMsg").html('<label style="color:red">Please enter interface name</label>');
+                return false;
+            }
+
+            interface = interface.value.toString();
+            $.getJSON('NTTGN/Interfaces/'+interface,
+                function(data) {
+
+              show_details(data);
+              //alert(data);
+            }).error(function() { $("#auditDialog").html('No Such Interface            Found'); });
+            return false;
+          });
+        });
+function show_details(historyData){
+    var table = document.createElement('table');
+    table.id = "auditTable";
+    table.setAttribute("class", "table table-hover active");
+    //table.setAttribute("style", "font-size:12px;text-align:center");
+    var thead = document.createElement("thead");
+    var tr = document.createElement("tr");
+    for (var key in historyData[0]) {
+
+        var th = document.createElement('th');
+        th.appendChild(document.createTextNode(key.replace(/_/gi, " ")));
+        tr.appendChild(th);
+    }
+    thead.appendChild(tr);
+    table.appendChild(thead);
+    tbody = document.createElement('tbody');
+    for (var i = 0; i < historyData.length; i++) {
+
+        var tr1 = document.createElement('tr');
+        for (var property in historyData[i]) {
+
+            var val;
+            var value = historyData[i][property];
+                var td = document.createElement('td');
+                var div = document.createElement('div');
+                //div.setAttribute("style", "width:600px;white-space: normal;
+                //word-wrap: break-word;text-align:left");
+                div.appendChild(document.createTextNode(value));
+                td.appendChild(div);
+                tr1.appendChild(td);
+        }
+
+        tbody.appendChild(tr1);
+    }
+    table.appendChild(tbody);
+
+
+    var tempH = parseInt($(window).height() * 1 / 5);
+    //alert(tempH);
+    var x = "top+" + parseInt(250 + tempH);
+    // alert(x);
+    $("#auditDialog").html(table);
+}
+
+
+</script>
+{% endblock %}
